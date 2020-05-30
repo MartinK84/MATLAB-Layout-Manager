@@ -173,7 +173,7 @@ classdef LayoutManager
             layoutList = LayoutManager.LoadLayouts();
             layoutIndex = LayoutManager.GetLayoutIndex(layoutList, layout.Name);
             if (isempty(layoutIndex))
-                layoutList = cat(2, makeRow(layoutList), {layout});
+                layoutList = cat(2, LayoutManager.MakeRow(layoutList), {layout});
             else
                 layoutList{layoutIndex} = layout;
             end
