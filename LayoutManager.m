@@ -1,7 +1,40 @@
 classdef LayoutManager
+% A static Helper class for managing (saving and restoring) figure, axes 
+% and plot layouts.
+%
+% With this small MATLAB Layout Manager you can easily save the layout of
+% any figure and restore it to any other figure. The layouts are
+% persistently stored between sessions so that you can easily create 
+% templates for your preferred figure designs and apply them to other
+% figures with a single line of code.
+%
+% For a mode detailed description and a demo please see the <a href="matlab:edit('README.md')">README.md</a>
+%
+% Example:
+%   [... Plotting code ...]
+%   LayoutManager.Save('Demo'); % save the curennt figure layout and design
+%   [... Plotting another figure ...]
+%   LayoutManager.ApplyLayout('Demo'); % restore the previously saved layout
     
     methods (Static)
+        
         function [FileName] = GetSettingsFile()
+            % function [FileName] = GetSettingsFile()
+            %
+            % Get the path to the settings file used for storing the layouts.
+            % The function will first check if the layoutManager.json file
+            % exists in the current working directora. If not the
+            % layoutManager.json file will be returned from the MATLAB
+            % userpath directory.
+            %
+            % Typically this function is only used internally
+            %
+            % Returns:
+            %   FileName:   path to the layoutManager.json file
+            %
+            % Example:
+            %   path = LayoutManager.GetSettingsFile();
+
             localSettings = fullfile(pwd, 'layoutManager.json');
             globalSettings = fullfile(userpath, 'layoutManager.json');            
             
@@ -13,6 +46,19 @@ classdef LayoutManager
         end
         
         function [Layout] = GetDefaultLayout()
+            % function [Layout] = GetDefaultLayout()
+            %
+            % Returns the default layout struct that is used when no
+            % settings file exists
+            %
+            % Returns:
+            %   Layout:  struct containing the default layout settings
+            %
+            % This function is typically only used internally
+            %
+            % Example:
+            %   layout = LayoutManager.GetDefaultLayout();
+            
             % default figure layout
             Layout.figure.Color = [1 1 1];
             
@@ -33,6 +79,19 @@ classdef LayoutManager
         end
         
         function DemoLayout(Name)
+            % function DemoLayout(Name)
+            %
+            % Creates a demo plot and applies the given layout. This
+            % function can be used to test layouts. If no layout is given
+            % the default layout will be used
+            %
+            % Parmaeters:
+            %   Name:   name of the layout which is to be applied to the
+            %           demo figure
+            %
+            % Example:
+            %   LayoutManager.DemoLayout('Demo');
+
             if (nargin < 1)
                 Name = [];
             end
@@ -55,6 +114,19 @@ classdef LayoutManager
         end
         
         function ApplyLayout(Name, Figure)
+            % function ApplyLayout(Name, Figure)
+            % 
+            % Load the layout with the given Name and apply all of its
+            % layout properties to the given figure.
+            %
+            % Parameters:
+            %   Name:               name of the layout to load and apply
+            %   Figure (optional):  figure handle. If not set uses 'gcf'
+            %
+            % Example:
+            %   LayoutManager.ApplyLayout('Demo');
+            %   LayoutManager.ApplyLayout('Demo', gcf);
+            
             if (nargin < 1)
                 Name = [];
             end
@@ -92,6 +164,17 @@ classdef LayoutManager
         end
         
         function [Layouts] = LoadLayouts()
+            % function [Layouts] = LoadLayouts()
+            %
+            % Load all layouts from the settings file and return them as
+            % array of layout structs. 
+            %
+            % Returns:
+            %   Layouts:    array of layout structs
+            %  
+            % Examples:
+            %   layouts = LayoutManager.LoadLayouts();
+            
             try
                 % open file and read all text
                 fid = fopen(LayoutManager.GetSettingsFile(), 'r');
@@ -116,6 +199,36 @@ classdef LayoutManager
         end
         
         function Save(Name, Figure, Params)
+            % function Save(Name, Figure, Params)
+            %
+            % Save the layout of the given Figure under the specified Name.
+            % Optionially sepcify which layout parameters are to be
+            % saved using the Params option. 
+            %
+            % Options for Params are:
+            %   'Basic' or empty:   default settings
+            %   'Full':             store also figure location, toolbar,
+            %                       menubar and window state
+            %   'Line':             store LineStyle, LineWidth and Marker
+            %                       settings. The settings will be taken
+            %                       from the first line graph of the first
+            %                       figure axis
+            % A combination of parameter such as 'Full,Line' is also
+            % possible. 
+            %
+            % Parameters:
+            %   Name:                name of the saved layout (existing 
+            %                        layouts with the same name will be overwritten)
+            %   Figure (optional):   handle to the figure of which the
+            %                        layout will be saved. Uses 'gcf' if
+            %                        not set.
+            %   Params (optional):   sepcify which layout parameters to
+            %                        save (see above for details)
+            %
+            % Example:
+            %   LayoutManager.Save('Demo');
+            %   LayoutManager.Save('Demo', gcf, 'Line);
+            
             if (nargin < 3)
                 Params = 'Basic';
             end
@@ -197,6 +310,19 @@ classdef LayoutManager
         end
         
         function [Index] = GetLayoutIndex(LayoutList, Name)
+            % [Index] = GetLayoutIndex(LayoutList, Name)
+            %
+            % From a given LayoutList return the index of the layout with
+            % the given Name.
+            % 
+            % Parameters:
+            %   LayoutList: array of layout structs
+            %   Name:       name of the layout to find
+            %
+            % Arguments:
+            %   layoutList = LayoutManaget.LoadLayouts();
+            %   [index] = LayoutManager.GetLayoutIndex(layoutList, 'Demo');
+            
             Index = [];
             if isempty(LayoutList)
                 return;
@@ -211,6 +337,13 @@ classdef LayoutManager
         end
         
         function List()
+            % function List()
+            % 
+            % Lists all available layouts
+            % 
+            % Example:
+            %   LayoutManager.List();
+            
             fprintf('\n<strong>List of stored layouts:</strong>\n');
             
             layoutList = LayoutManager.LoadLayouts();
@@ -224,6 +357,7 @@ classdef LayoutManager
     end
     
     methods (Static, Hidden)
+        % internally used functions
         
         function Dst = MakeRow(Src)
             if iscolumn(Src)
