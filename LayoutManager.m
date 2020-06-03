@@ -149,16 +149,22 @@ classdef LayoutManager
             
             % copy layout properties           
             Figure.Units = 'Normalized';
-            LayoutManager.CopyProperties(layout.figure, Figure);            
+            if (isfield(layout,'figure'))
+                LayoutManager.CopyProperties(layout.figure, Figure);
+            end
             
             axesHandles = find(contains(arrayfun(@class, Figure.Children, 'UniformOutput', false),'.Axes') == 1);
             for iAxes = 1:length(axesHandles)
                 curAxis = Figure.Children(axesHandles(iAxes));
-                LayoutManager.CopyProperties(layout.axis,curAxis);    
+                if (isfield(layout,'axis'))
+                    LayoutManager.CopyProperties(layout.axis,curAxis);    
+                end
                 
-                lineHandes = find(contains(arrayfun(@class, curAxis.Children, 'UniformOutput', false),'.Line') == 1);
-                for iLine = 1:length(lineHandes)
-                    LayoutManager.CopyProperties(layout.line, curAxis.Children(lineHandes(iLine)));    
+                if (isfield(layout,'line'))
+                    lineHandes = find(contains(arrayfun(@class, curAxis.Children, 'UniformOutput', false),'.Line') == 1);
+                    for iLine = 1:length(lineHandes)
+                        LayoutManager.CopyProperties(layout.line, curAxis.Children(lineHandes(iLine)));    
+                    end
                 end
             end                        
         end
